@@ -7,7 +7,14 @@ function index(req, res){
             return res.status(500).json({error: err.message})
         }
 
-        res.json(result)
+        const movies = result.map(movie => {
+            return{
+                ...movie,
+                image: `http://localhost:${process.env.port}/${movie.image}`
+            }
+        })
+
+        res.json(movies)
     })
 }
 
@@ -23,6 +30,7 @@ function show (req,res){
             return res.status(404).json({mess: 'risorsa non trovata'})
         }
         const movie = result[0];
+        movie.image = `http://localhost:${process.env.port}/${movie.image}`
 
         const reviewsSql = `SELECT * FROM reviews WHERE movie_id = ?`;
         connection.query(reviewsSql, [id], (err, result)=>{
