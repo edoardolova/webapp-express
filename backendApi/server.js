@@ -4,12 +4,19 @@ const port = process.env.PORT;
 const movieRouter = require('./routers/movieRouter.js')
 const errorsHandler = require("./middlewares/errorsHandler.js");
 const notFoundHandler = require("./middlewares/notFoundHandler.js");
+const reviewRouter = require("./routers/reviewRouter.js")
 
+// cors 
+const cors = require('cors')
+
+app.use(cors())
 app.use(express.static('public'));
 app.use('/movies', movieRouter)
 app.listen(port, ()=>{
     console.log(`listening at port: ${port}`)
 })
+
+app.use('/reviews', reviewRouter);
 
 
 // home 
