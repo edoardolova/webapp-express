@@ -9,4 +9,6 @@ router.get('/', movieController.index);
 // show
 router.get('/:slug', movieController.show);
 
+
+
 module.exports = router;

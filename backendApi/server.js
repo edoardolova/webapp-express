@@ -8,6 +8,8 @@ const reviewRouter = require("./routers/reviewRouter.js")
 
 // cors 
 const cors = require('cors')
+// parsing req body for post
+app.use(express.json());
 
 app.use(cors())
 app.use(express.static('public'));
