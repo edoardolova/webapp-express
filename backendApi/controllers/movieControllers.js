@@ -1,6 +1,9 @@
 const connection = require('../database/connection.js')
 const slugify = require('slugify');
 
+// multer
+const path = require('path');
+
 function index(req, res){
     const sql = 'SELECT * FROM movies';
     connection.query(sql, (err, result)=>{
@@ -50,7 +53,45 @@ function show(req, res) {
     });
 }
 
+
+function store(req, res) {
+    const { title, director, genre, release_year, abstract } = req.body;
+
+    if (!req.file) {
+        return res.status(400).json({ error: 'Immagine mancante' });
+    }
+
+    const imageFileName = req.file.filename; 
+
+    const sql = `
+        INSERT INTO movies (title, director, genre, release_year, abstract, image, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
+    `;
+
+    const values = [title, director, genre, release_year, abstract, imageFileName];
+
+    connection.query(sql, values, (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        res.status(201).json({
+            message: 'Film aggiunto con successo',
+            movie: {
+                id: result.insertId,
+                title,
+                director,
+                genre,
+                release_year,
+                abstract,
+                image: `http://localhost:${process.env.PORT}/${imageFileName}`
+            }
+        });
+    });
+}
+
 module.exports ={
     index,
-    show
+    show,
+    store
 }
