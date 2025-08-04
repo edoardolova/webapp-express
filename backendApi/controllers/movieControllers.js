@@ -1,4 +1,5 @@
 const connection = require('../database/connection.js')
+const slugify = require('slugify');
 
 function index(req, res){
     const sql = 'SELECT * FROM movies';
@@ -18,30 +19,35 @@ function index(req, res){
     })
 }
 
-function show (req,res){
-    const id = parseInt(req.params.id)
-    const movieSql = `SELECT * FROM movies WHERE id = ?`
 
-    connection.query(movieSql, [id], (err, result)=>{
+// Mostra film per slug
+function show(req, res) {
+    const slug = req.params.slug;  
+
+    const movieSql = `SELECT * FROM movies`;
+    connection.query(movieSql, (err, result) => {
         if (err) {
-            return res.status(500).json({error: err.message})
+            return res.status(500).json({ error: err.message });
         }
-        if (result.length === 0) {
-            return res.status(404).json({mess: 'risorsa non trovata'})
+
+        const movie = result.find(film => slugify(film.title, { lower: true, replacement: '-' }) === slug);
+        
+        if (!movie) {
+            return res.status(404).json({ mess: 'Film non trovato' });
         }
-        const movie = result[0];
-        movie.image = `http://localhost:${process.env.port}/${movie.image}`
+
+        movie.image = `http://localhost:${process.env.PORT}/${movie.image}`;
 
         const reviewsSql = `SELECT * FROM reviews WHERE movie_id = ?`;
-        connection.query(reviewsSql, [id], (err, result)=>{
+        connection.query(reviewsSql, [movie.id], (err, reviewsResult) => {
             if (err) {
-                return res.status(500).json({error: err.message})
+                return res.status(500).json({ error: err.message });
             }
 
-            movie.reviews = result;
-            res.json(movie)
-        })
-    })
+            movie.reviews = reviewsResult;
+            res.json(movie);
+        });
+    });
 }
 
 module.exports ={
